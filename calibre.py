@@ -58,7 +58,7 @@ class Kniha(Base):
     # Datum přidání do knihovny
     pridano = Column(DateTime)
     # Přečtená (ano/ne)
-    precteno = Column(Integer)
+    precteno = Column(String)
     # Rozečteno (ano/ne)
     rozecteno = Column(Integer)
     # Půjčená (půjčená komu/None)
@@ -91,8 +91,9 @@ def vypis():
     sezeni = pripoj_se()
     dotaz = sezeni.query(Kniha)
     for kniha in dotaz.all():
-        print(f'{"[x]" if kniha.pujceno else "[ ]"} {kniha.id} {kniha.nazev} {kniha.autor} {kniha.pocet_stran}p. {kniha.pridano} {kniha.pujceno}')
+        print(f'{"[x]" if kniha.pujceno else "[ ]"} {kniha.id} {kniha.nazev} {kniha.autor} {kniha.pocet_stran}p. {kniha.pridano} {kniha.precteno} {kniha.pujceno}')
 
+# Editovat chybné položky
 @knihovna.command()
 @click.option('--identifikace',prompt='Zadej ID knihy')
 @click.option('--pocet_stran',prompt='Zadej počet stran')
@@ -136,9 +137,24 @@ def vrat(identifikace):
     sezeni.commit()
     print(f'Kniha s ID {kniha.id} je vrácena.')
 
-# Editovat chybné položky
 
 # Nastavovat příznak přečtení
+@knihovna.command()
+@click.option('--identifikace',prompt='Zadej ID knihy')
+@click.option('--precteno/--neprecteno', default=False, prompt="Prečtena?")
+def oznac(identifikace, precteno, neprecteno=None):
+    sezeni = pripoj_se()
+    dotaz = sezeni.query(Kniha)
+    kniha = dotaz.filter_by(id=identifikace).one()
+    if precteno:
+        kniha.precteno = 'prectena'
+    else:
+        kniha.precteno = 'neprectena'
+    sezeni.add(kniha)
+    sezeni.commit()
+    print(f'Kniha {kniha.id} byla přečtena')
+
+
 # Nastavovat příznak rozečtení
 
 
